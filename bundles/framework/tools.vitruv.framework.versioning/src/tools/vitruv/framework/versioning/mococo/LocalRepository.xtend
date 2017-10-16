@@ -1,10 +1,8 @@
-package tools.vitruv.framework.versioning.emfstore
+package tools.vitruv.framework.versioning.mococo
 
 import java.util.List
 import java.util.Set
-
 import org.eclipse.xtext.xbase.lib.Functions.Function1
-
 import tools.vitruv.framework.change.echange.EChange
 import tools.vitruv.framework.versioning.Conflict
 import tools.vitruv.framework.versioning.author.Author

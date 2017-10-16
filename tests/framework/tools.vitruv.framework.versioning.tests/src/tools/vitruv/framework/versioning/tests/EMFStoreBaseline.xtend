@@ -20,11 +20,11 @@ import tools.vitruv.framework.versioning.MultiChangeConflict
 import tools.vitruv.framework.versioning.SimpleChangeConflict
 import tools.vitruv.framework.versioning.author.Author
 import tools.vitruv.framework.versioning.common.commit.SimpleCommit
-import tools.vitruv.framework.versioning.emfstore.InternalTestLocalRepository
-import tools.vitruv.framework.versioning.emfstore.PushState
-import tools.vitruv.framework.versioning.emfstore.RemoteRepository
-import tools.vitruv.framework.versioning.emfstore.impl.LocalRepositoryImpl
-import tools.vitruv.framework.versioning.emfstore.impl.RemoteRepositoryImpl
+import tools.vitruv.framework.versioning.mococo.InternalTestLocalRepository
+import tools.vitruv.framework.versioning.mococo.PushState
+import tools.vitruv.framework.versioning.mococo.RemoteRepository
+import tools.vitruv.framework.versioning.mococo.impl.LocalRepositoryImpl
+import tools.vitruv.framework.versioning.mococo.impl.RemoteRepositoryImpl
 import tools.vitruv.framework.versioning.extensions.CommitSerializer
 import tools.vitruv.framework.versioning.extensions.URIRemapper
 import tools.vitruv.framework.vsum.InternalTestVersioningVirtualModel
@@ -425,6 +425,129 @@ class EMFStoreBaseline extends VitruviusApplicationTest {
 		assertThat(newCommitAccepted, is(PushState::SUCCESS))
 		assertThat(remoteRepository.commits, hasSize(5))
 	}
+	
+	@Test
+	def void emfStoreChangeAndDeleteRootExample() {
+		emfHelloWorldExample
+
+		assertThat(localRepository.commits.length, is(newLocalRepository.commits.length))
+		assertThat(localRepository.commits, hasSize(2))
+
+		league1.name = newName1
+		league1.saveAndSynchronizeChanges
+
+		val myCommit = localRepository.commit("Commit1", virtualModel, sourceVURI)
+		assertThat(myCommit.changes, hasSize(1))
+		assertThat(localRepository.commits, hasSize(3))
+		assertThat(localRepository.push, is(PushState::SUCCESS))
+
+		newLocalRepository.checkout(newSourceVURI)
+		val modelInstance = newLocalRepository.virtualModel.getModelInstance(newSourceVURI)
+
+		val newLeague1 = modelInstance.resource.contents.get(0) as League
+		modelInstance.resource.save(#{})
+		assertThat(newLeague1.name, equalTo(leagueName))
+		assertThat(newLeague1.players.get(0).name, equalTo("Maximilian"))
+
+		val ResourceSet testResourceSet = new ResourceSetImpl
+		testResourceSet.resourceFactoryRegistry.extensionToFactoryMap.put("*", new XMIResourceFactoryImpl)
+		val sourceModel = testResourceSet.getResource(newLeague1.eResource.URI, true)
+		val newLeague = sourceModel.contents.get(0) as League
+		newLeague.startRecordingChanges
+		sourceModel.contents.remove(0)
+		newLeague.saveAndSynchronizeChanges
+		val testVuri = VURI::getInstance(newLeague.eResource)
+		assertThat(newLocalRepository.commits, hasSize(2))
+		val newCommit = newLocalRepository.commit("Commit2", virtualModel, testVuri)
+		assertThat(newLocalRepository.commits, hasSize(3))
+		assertThat(newCommit.changes, hasSize(1))
+		val commitAccepted = newLocalRepository.push
+		assertThat(commitAccepted, is(PushState::COMMIT_NOT_ACCEPTED))
+
+		val remoteBranch = newLocalRepository.currentBranch.remoteBranch
+		assertThat(newLocalRepository.getCommits(remoteBranch), hasSize(2))
+		newLocalRepository.pull
+		assertThat(newLocalRepository.getCommits(remoteBranch), hasSize(3))
+		val lastRemoteCommit = newLocalRepository.getCommits(remoteBranch).last
+		val lastLocalCommit = newLocalRepository.getCommits(newLocalRepository.currentBranch).last
+		assertThat(lastRemoteCommit.identifier, not(equalTo(lastLocalCommit.identifier)))
+		(virtualModel as InternalTestVersioningVirtualModel).addMappedVURIs(sourceVURI, newSourceVURI)
+		val mergeCommit = newLocalRepository.merge(
+			remoteBranch,
+			newLocalRepository.currentBranch,
+			acceptTheirChangesCallback,
+			triggeredCallback,
+			virtualModel
+		)
+		assertThat(mergeCommit.changes, hasSize(1))
+		val testLeague2 = virtualModel.getModelInstance(sourceVURI).firstRootEObject as League
+		assertThat(testLeague2.name, equalTo(newName2))
+		assertThat(remoteRepository.commits, hasSize(3))
+		val newCommitAccepted = newLocalRepository.push
+		assertThat(newCommitAccepted, is(PushState::SUCCESS))
+		assertThat(remoteRepository.commits, hasSize(5))
+	}
+	@Test
+	def void emfStoreChangeAndDeleteExample() {
+		emfHelloWorldExample
+
+		assertThat(localRepository.commits.length, is(newLocalRepository.commits.length))
+		assertThat(localRepository.commits, hasSize(2))
+
+		league1.players.get(1).name = "Hans"
+		league1.saveAndSynchronizeChanges
+
+		val myCommit = localRepository.commit("Commit1", virtualModel, sourceVURI)
+		assertThat(myCommit.changes, hasSize(1))
+		assertThat(localRepository.commits, hasSize(3))
+		assertThat(localRepository.push, is(PushState::SUCCESS))
+
+		newLocalRepository.checkout(newSourceVURI)
+		val modelInstance = newLocalRepository.virtualModel.getModelInstance(newSourceVURI)
+
+		val newLeague1 = modelInstance.resource.contents.get(0) as League
+		modelInstance.resource.save(#{})
+		assertThat(newLeague1.name, equalTo(leagueName))
+		assertThat(newLeague1.players.get(0).name, equalTo("Maximilian"))
+
+		val ResourceSet testResourceSet = new ResourceSetImpl
+		testResourceSet.resourceFactoryRegistry.extensionToFactoryMap.put("*", new XMIResourceFactoryImpl)
+		val sourceModel = testResourceSet.getResource(newLeague1.eResource.URI, true)
+		val newLeague = sourceModel.contents.get(0) as League
+		newLeague.startRecordingChanges
+		newLeague.players.remove(1)
+		newLeague.saveAndSynchronizeChanges
+		val testVuri = VURI::getInstance(newLeague.eResource)
+		assertThat(newLocalRepository.commits, hasSize(2))
+		val newCommit = newLocalRepository.commit("Commit2", virtualModel, testVuri)
+		assertThat(newLocalRepository.commits, hasSize(3))
+		assertThat(newCommit.changes, hasSize(1))
+		val commitAccepted = newLocalRepository.push
+		assertThat(commitAccepted, is(PushState::COMMIT_NOT_ACCEPTED))
+
+		val remoteBranch = newLocalRepository.currentBranch.remoteBranch
+		assertThat(newLocalRepository.getCommits(remoteBranch), hasSize(2))
+		newLocalRepository.pull
+		assertThat(newLocalRepository.getCommits(remoteBranch), hasSize(3))
+		val lastRemoteCommit = newLocalRepository.getCommits(remoteBranch).last
+		val lastLocalCommit = newLocalRepository.getCommits(newLocalRepository.currentBranch).last
+		assertThat(lastRemoteCommit.identifier, not(equalTo(lastLocalCommit.identifier)))
+		(virtualModel as InternalTestVersioningVirtualModel).addMappedVURIs(sourceVURI, newSourceVURI)
+		val mergeCommit = newLocalRepository.merge(
+			remoteBranch,
+			newLocalRepository.currentBranch,
+			acceptTheirChangesCallback,
+			triggeredCallback,
+			virtualModel
+		)
+		assertThat(mergeCommit.changes, hasSize(1))
+		val testLeague2 = virtualModel.getModelInstance(sourceVURI).firstRootEObject as League
+		assertThat(testLeague2.name, equalTo(newName2))
+		assertThat(remoteRepository.commits, hasSize(3))
+		val newCommitAccepted = newLocalRepository.push
+		assertThat(newCommitAccepted, is(PushState::SUCCESS))
+		assertThat(remoteRepository.commits, hasSize(5))
+	}
 
 	@Test
 	def void emfHelloWorldExample2VirtualModels() {
@@ -553,4 +676,5 @@ class EMFStoreBaseline extends VitruviusApplicationTest {
 		assertThat(newCommitAccepted, is(PushState::SUCCESS))
 		assertThat(remoteRepository.commits, hasSize(5))
 	}
+	
 }

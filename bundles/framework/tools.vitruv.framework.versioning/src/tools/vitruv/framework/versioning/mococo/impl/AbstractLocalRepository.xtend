@@ -1,4 +1,4 @@
-package tools.vitruv.framework.versioning.emfstore.impl
+package tools.vitruv.framework.versioning.mococo.impl
 
 import java.util.List
 import java.util.Map
@@ -34,7 +34,7 @@ import tools.vitruv.framework.versioning.branch.RemoteBranch
 import tools.vitruv.framework.versioning.branch.impl.LocalBranchImpl
 import tools.vitruv.framework.versioning.common.commit.Commit
 import tools.vitruv.framework.versioning.common.commit.SimpleCommit
-import tools.vitruv.framework.versioning.emfstore.InternalTestLocalRepository
+import tools.vitruv.framework.versioning.mococo.InternalTestLocalRepository
 import tools.vitruv.framework.versioning.extensions.URIRemapper
 import tools.vitruv.framework.vsum.InternalModelRepository
 import tools.vitruv.framework.vsum.InternalTestVersioningVirtualModel
@@ -249,6 +249,37 @@ abstract class AbstractLocalRepository<T> extends AbstractRepositoryImpl impleme
 		merge(source -> null, target -> null, originalCallback, triggeredCallback, currentVirtualModel)
 	}
 
+	private def Pair<Integer, Integer> calculateCommitsToDrop(
+		List<String> sourceCommitsId,
+		List<String> targetCommitsId
+	) {
+		if(sourceCommitsId.length < targetCommitsId.length)
+			return calculateCommitsNumber(sourceCommitsId, targetCommitsId.reverseView)
+		val pair = calculateCommitsNumber(targetCommitsId, sourceCommitsId.reverseView)
+		return pair.value -> pair.key
+	}
+
+	private def calculateCommitsNumber(
+		List<String> smallerList,
+		List<String> greaterList
+	) {
+		val map = newHashMap
+		for (i : 0 ..< smallerList.size)
+			map.put(smallerList.get(i), i)
+		for (greaterIndex : 0 ..< greaterList.size) {
+			val greaterId = greaterList.get(greaterIndex)
+			if(map.containsKey(greaterId)) {
+				// PS greaterId is the last common predecessor.
+				val smallerIndex = map.get(greaterId)
+				// PS Calculate the commits to drop.
+				val commitsToDropOnTheSmallerSide = smallerList.size - smallerIndex
+				val commitsToDropOnTheGreaterSide = greaterList.size - greaterIndex
+				return commitsToDropOnTheSmallerSide -> commitsToDropOnTheGreaterSide
+			}
+		}
+		throw new IllegalStateException('''The initial commit must be equal!''')
+	}
+
 	override merge(
 		Pair<Branch, VersioningVirtualModel> sourcePair,
 		Pair<Branch, VersioningVirtualModel> targetPair,
@@ -263,21 +294,11 @@ abstract class AbstractLocalRepository<T> extends AbstractRepositoryImpl impleme
 		val sourceCommitsId = sourceCommits.map[identifier]
 		val targetCommitsId = targetCommits.map[identifier]
 		val vuri = targetCommits.last.changes.get(0).originalChange.URI
-		var firstDifferentIndex = 0
-
-		// PS Find the first different commit identifier
-		for (i : 0 ..< Math.min(sourceCommits.length, targetCommits.length)) {
-			val sourceId = sourceCommitsId.get(i)
-			val targetId = targetCommitsId.get(i)
-			if(sourceId != targetId)
-				firstDifferentIndex = i
-		}
-		if(firstDifferentIndex === 0)
-			throw new IllegalStateException('''The intial commit must be equal!''')
+		var commitsNumbersToDrop = calculateCommitsToDrop(sourceCommitsId, targetCommitsId)
 
 		// PS Drop all common commits 
-		val sourceCommitsToCompare = sourceCommits.drop(firstDifferentIndex).toList
-		val targetCommitsToCompare = targetCommits.drop(firstDifferentIndex).toList
+		val sourceCommitsToCompare = sourceCommits.drop(commitsNumbersToDrop.key).toList
+		val targetCommitsToCompare = targetCommits.drop(commitsNumbersToDrop.value).toList
 		val sourceChanges = sourceCommitsToCompare.map[changes].flatten.toList
 		val targetChanges = targetCommitsToCompare.map[changes].flatten.toList
 
@@ -289,7 +310,7 @@ abstract class AbstractLocalRepository<T> extends AbstractRepositoryImpl impleme
 
 		val branchDiff = createVersionDiff(sourceChanges, targetChanges)
 		val modelMerger = ModelMerger::createModelMerger
-		val lastPropagatedTargetChange = targetCommits.get(firstDifferentIndex - 1).changes.last.id
+		val lastPropagatedTargetChange = targetCommits.get(commitsNumbersToDrop.value - 1).changes.last.id
 
 		modelMerger.init(branchDiff, originalCallback, triggeredCallback, idPairs)
 		modelMerger.compute
