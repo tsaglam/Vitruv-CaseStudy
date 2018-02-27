@@ -16,15 +16,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 
 import tools.vitruv.domains.emf.monitorededitor.ISynchronizingMonitoredEmfEditor.ResourceChangeSynchronizing;
 import tools.vitruv.domains.emf.monitorededitor.IVitruviusEMFEditorMonitor.IVitruviusAccessor;
 import tools.vitruv.framework.change.description.PropagatedChange;
 import tools.vitruv.framework.change.description.VitruviusChange;
-import tools.vitruv.framework.uuid.UuidGeneratorAndResolver;
 import tools.vitruv.framework.util.datatypes.ModelInstance;
 import tools.vitruv.framework.util.datatypes.VURI;
+import tools.vitruv.framework.uuid.UuidGeneratorAndResolver;
 import tools.vitruv.framework.vsum.VirtualModel;
 
 public class DefaultImplementations {
@@ -59,6 +60,10 @@ public class DefaultImplementations {
         @Override
         public UuidGeneratorAndResolver getUuidGeneratorAndResolver() {
             return null;
+        }
+
+        @Override
+        public void applyDelta(URI fileURI, boolean forwards) {
         }
     };
 
@@ -136,6 +141,10 @@ public class DefaultImplementations {
         @Override
         public UuidGeneratorAndResolver getUuidGeneratorAndResolver() {
             return null;
+        }
+
+        @Override
+        public void applyDelta(URI fileURI, boolean forwards) {
         }
 
     }

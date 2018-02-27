@@ -19,6 +19,8 @@ import tools.vitruv.framework.util.command.EMFCommandBridge
 import tools.vitruv.framework.vsum.repositories.ResourceRepositoryImpl
 import tools.vitruv.framework.vsum.repositories.ModelRepositoryImpl
 import tools.vitruv.framework.change.echange.EChangeIdManager
+import org.eclipse.emf.common.util.URI
+import tools.vitruv.extensions.delta.modul.DeltaModul
 
 class VirtualModelImpl implements InternalVirtualModel {
 	private val ResourceRepositoryImpl resourceRepository;
@@ -105,6 +107,28 @@ class VirtualModelImpl implements InternalVirtualModel {
 	
 	override getUuidGeneratorAndResolver() {
 		return resourceRepository.uuidGeneratorAndResolver
+	}
+	
+	override applyDelta(URI fileURI, boolean forwards) { 
+		val deltaModul = new DeltaModul(fileURI, uuidGeneratorAndResolver)
+		var VitruviusChange change
+		if (forwards) {
+			change = deltaModul.changes
+		
+		} else {
+			change = deltaModul.inverseChanges
+		}
+		val propChange = propagateChange(change)
+		val command = EMFCommandBridge.createVitruviusRecordingCommand([|
+			propChange.reverseView.forEach[it.applyForward(uuidGeneratorAndResolver)];
+			return null;
+		])
+		resourceRepository.executeRecordingCommandOnTransactionalDomain(command);
+
+		// TODO HK Instead of this make the changes set the modified flag of the resource when applied
+		val changedEObjects = propChange.map[originalChange.affectedEObjects + consequentialChanges.affectedEObjects].flatten
+		changedEObjects.map[eResource].filterNull.forEach[modified = true];
+		save();
 	}
 	
 }

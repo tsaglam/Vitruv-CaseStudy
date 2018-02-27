@@ -107,8 +107,8 @@ public class VitruviusEMFEditorMonitorImpl implements IVitruviusEMFEditorMonitor
     public VitruviusEMFEditorMonitorImpl(IEditorPartAdapterFactory factory, VirtualModel virtualModel,
             IVitruviusAccessor vitruvAccessor) {
         ResourceChangeSynchronizing internalChangeSync = createInternalChangeSynchronizing();
-        changeRecorderMonitor = new SynchronizingMonitoredEmfEditorImpl(virtualModel, internalChangeSync, factory,
-                monitoringDecider);
+        changeRecorderMonitor = new DeltaModulSynchronizingMonitoredEmfEditorImpl(virtualModel, internalChangeSync,
+                factory, monitoringDecider);
         this.vitruvAccessor = vitruvAccessor;
         this.editorPartAdapterFactory = factory;
         this.virtualModel = virtualModel;

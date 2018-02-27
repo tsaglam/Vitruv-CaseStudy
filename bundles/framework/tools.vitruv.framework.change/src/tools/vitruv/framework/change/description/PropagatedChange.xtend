@@ -2,6 +2,7 @@ package tools.vitruv.framework.change.description
 
 import org.eclipse.xtend.lib.annotations.Data
 import tools.vitruv.framework.uuid.UuidResolver
+import tools.vitruv.framework.uuid.UuidGeneratorAndResolver
 
 @Data
 class PropagatedChange {
@@ -19,6 +20,13 @@ class PropagatedChange {
 		originalChange.unresolveIfApplicable;
 		consequentialChanges.resolveAfterAndApplyBackward(uuidResolver);
 		originalChange.resolveAfterAndApplyBackward(uuidResolver);
+	}
+	
+	def applyForward(UuidGeneratorAndResolver uuidResolver) {
+		consequentialChanges.unresolveIfApplicable;
+		originalChange.unresolveIfApplicable;
+		consequentialChanges.resolveBeforeAndApplyForward(uuidResolver);
+		originalChange.resolveBeforeAndApplyForward(uuidResolver)
 	}
 	
 }

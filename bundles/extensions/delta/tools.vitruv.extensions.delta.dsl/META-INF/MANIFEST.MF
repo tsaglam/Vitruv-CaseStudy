@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: tools.vitruv.extensions.delta.dsl
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: tools.vitruv.extensions.delta.dsl; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.xtext.xbase.lib,
+ org.antlr.runtime,
+ org.eclipse.xtext.util,
+ org.eclipse.emf.common,
+ org.eclipse.xtend.lib
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: tools.vitruv.extensions.delta.dsl.deltaModul.impl,
+ tools.vitruv.extensions.delta.dsl.validation,
+ tools.vitruv.extensions.delta.dsl.parser.antlr.internal,
+ tools.vitruv.extensions.delta.dsl.scoping,
+ tools.vitruv.extensions.delta.dsl.parser.antlr,
+ tools.vitruv.extensions.delta.dsl.deltaModul,
+ tools.vitruv.extensions.delta.dsl.services,
+ tools.vitruv.extensions.delta.dsl.serializer,
+ tools.vitruv.extensions.delta.dsl.deltaModul.util,
+ tools.vitruv.extensions.delta.dsl,
+ tools.vitruv.extensions.delta.dsl.generator
+Import-Package: org.apache.log4j

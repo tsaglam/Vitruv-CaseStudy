@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Delta
+Bundle-SymbolicName: tools.vitruv.extensions.delta;singleton:=true
+Bundle-Version: 0.2.0.qualifier
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.emf;bundle-version="2.6.0",
+ org.eclipse.emf.transaction,
+ org.eclipse.emf.edit,
+ org.eclipse.gmf.runtime.diagram.ui;bundle-version="1.7.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.core.expressions,
+ org.eclipse.core.resources,
+ tools.vitruv.framework.change,
+ com.google.guava,
+ org.eclipse.xtext.xbase.lib,
+ org.eclipse.xtend.lib,
+ org.eclipse.xtend.lib.macro,
+ org.eclipse.xtext,
+ tools.vitruv.extensions.delta;bundle-version="0.2.0",
+ tools.vitruv.framework.util;bundle-version="0.2.0",
+ tools.vitruv.extensions.delta.dsl;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: vitruv.tools
+Export-Package: tools.vitruv.extensions.delta.modul
+

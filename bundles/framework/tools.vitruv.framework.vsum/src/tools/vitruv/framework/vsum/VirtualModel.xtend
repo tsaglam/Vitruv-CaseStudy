@@ -7,6 +7,7 @@ import java.io.File
 import java.util.List
 import tools.vitruv.framework.change.description.PropagatedChange
 import tools.vitruv.framework.uuid.UuidGeneratorAndResolver
+import org.eclipse.emf.common.util.URI
 
 interface VirtualModel {
 	def File getFolder();
@@ -14,4 +15,6 @@ interface VirtualModel {
 	def void reverseChanges(List<PropagatedChange> changes);
 	def ModelInstance getModelInstance(VURI modelVuri);
 	def UuidGeneratorAndResolver getUuidGeneratorAndResolver();
+	def void applyDelta(URI fileURI, boolean forwards)
+	
 }

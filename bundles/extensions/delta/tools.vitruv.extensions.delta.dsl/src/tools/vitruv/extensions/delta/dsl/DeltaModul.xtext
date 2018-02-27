@@ -1,0 +1,84 @@
+grammar tools.vitruv.extensions.delta.dsl.DeltaModul with org.eclipse.xtext.common.Terminals
+
+generate deltaModul "http://www.vitruv.tools/extensions/delta/dsl/DeltaModul"
+
+Model:
+	DeltaModul;
+
+DeltaModul:
+	'DELTAMODUL' name=ID 'OPERATING' 'ON' uri=STRING ':' 
+		('REQUIRED' 'DELTAMODUL:' (RequiredDeltaModul +=STRING ',')* RequiredDeltaModul += STRING ';' )?   
+		('REQUIRED' 'FEATURES:' (RequiredFeatures +=RequiredFeatureRule ',')* RequiredFeatures+=RequiredFeatureRule ';' )? 
+		('REQUIRED' 'OBJECTS:' (RequiredObjects += STRING ',')* RequiredObjects += STRING ';' )? 
+		('SETS' 'FEATURE:' (SetsFeatures +=SetsFeatureRule ',')* SetsFeatures+=SetsFeatureRule ';')? 
+		'CHANGES:' 
+			(Changes += (AtomicChange)+)
+;
+
+AtomicChange:
+	CreateChange | DeleteChange | SingleReferenceChange | InsertReferenceChange | RemoveReferenceChange | SingleAttributeChange | InsertAttributeChange | RemoveAttributeChange | InsertRootChange | RemoveRootChange 
+;
+
+InsertRootChange:
+	'INSERT' 'ROOT' affectedEObjectID=STRING ';' 
+;
+
+RemoveRootChange:
+	'REMOVE' 'ROOT' affectedEObjectID=STRING ';' 
+;
+
+
+RemoveAttributeChange:
+	'REMOVE' 'VALUE' oldValue=STRING 'IN' 'ATTRIBUTE' attribute=STRING 'AT' 'POSITION' index=INT 'OF' 'OBJECT' affectedEObjectID=STRING ';'   
+;
+
+InsertAttributeChange:
+	'INSERT' 'ATTRIBUTE' newValue=STRING 'IN' 'ATTRIBUTE' attribute=STRING 'AT' 'POSITION' index=INT 'OF' 'OBJECT' affectedEObjectID=STRING ';'  
+;
+SingleAttributeChange:
+	'REPLACE' 'OLD' 'VALUE' oldValue=STRING 'WITH' 'NEW' 'VALUE' newValue=STRING 'OF' 'ATTRIBUTE' attribute=STRING 'OF' 'OBJECT' affectedEObjectID=STRING ';' 	
+;
+
+RemoveReferenceChange:
+	'REMOVE' 'REFERENCE' oldValueID=STRING  'IN' 'FEATURE' feature=STRING 'AT' 'POSITION' index=INT 'OF' 'OBJECT' affectedEObjectID=STRING  ';'  
+;
+
+InsertReferenceChange:
+	'INSERT' 'REFERENCE' newValueID=STRING 'IN' 'FEATURE' feature=STRING 'AT' 'POSITION' index=INT 'OF' 'OBJECT' affectedEObjectID=STRING ';'  
+;
+
+SingleReferenceChange:
+	'REPLACE' 'OLD' 'REFERENCE'  oldValueID=STRING 'WITH' 'NEW' 'REFERENCE' newValueID=STRING 'OF' 'FEATURE' feature=STRING  'OF' 'OBJECT' affectedEObjectID=STRING ';'  
+;
+
+DeleteChange:
+	'DELETE' affectedEObjectID=STRING ';'  
+;
+
+CreateChange:
+	'CREATE' affectedEObjectID=STRING  'OF' 'TYPE' class=STRING  ';'  
+;
+
+
+
+RequiredFeatureRule:
+	(feature=ID) '=' isSet=BOOLEAN
+;
+
+SetsFeatureRule:
+	(feature=ID) ':=' isSet=BOOLEAN
+;
+
+terminal BOOLEAN:
+	'true' | 'false'
+;
+
+//terminal UUID:
+//	'_'('a'..'z'|'A'..'Z'|'0'..'9')('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-')+
+//;
+ 
+//terminal OBJECT_ID:
+//	'_'('a'..'z'|'A'..'Z'|'0'..'9')('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-')* ('.'('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-')+)*
+//;
+
+

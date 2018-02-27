@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="tools.vitruv.extensions.delta.ApplyDeltaModulForwardsHandler"
+            id="tools.vitruv.extensions.delta.ui.applyForwards"
+            name="applyForwards">
+      </command>
+      <command
+            defaultHandler="tools.vitruv.extensions.delta.ApplyDeltaModulBackwardsHandler"
+            id="tools.vitruv.extensions.delta.ui.applyBackwards"
+            name="applyBackwards">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="tools.vitruv.extensions.delta.ui.forwards">
+            <command
+                  commandId="tools.vitruv.extensions.delta.ui.applyForwards"
+                  style="push">
+            </command>
+         </toolbar>
+         <toolbar
+               id="tools.vitruv.extensions.delta.ui.backwards">
+            <command
+                  commandId="tools.vitruv.extensions.delta.ui.applyBackwards"
+                  style="push">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+
+</plugin>
