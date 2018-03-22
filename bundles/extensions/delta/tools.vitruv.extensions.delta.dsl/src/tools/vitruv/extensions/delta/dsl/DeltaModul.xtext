@@ -2,6 +2,14 @@ grammar tools.vitruv.extensions.delta.dsl.DeltaModul with org.eclipse.xtext.comm
 
 generate deltaModul "http://www.vitruv.tools/extensions/delta/dsl/DeltaModul"
 
+/*
+ * NK
+ * Directly using the EChanges of Vitruvius wasn't possible because they need besides the ObjectID also the EObject itself
+ * The defined changes in this file are an representation of the EChanges with less information (the EObject itself is missing), 
+ * but can be transformed into the EChanges with the uuidResolver. 
+ * 
+ */
+
 Model:
 	DeltaModul;
 
@@ -13,16 +21,23 @@ DeltaModul:
 		('SETS' 'FEATURE:' (SetsFeatures +=SetsFeatureRule ',')* SetsFeatures+=SetsFeatureRule ';')? 
 		'CHANGES:' 
 			(Changes += (AtomicChange)+)
+		('CONFLICT' conflicts+=Conflict)*
+;
+
+Conflict:
+	elementsInConflict+=STRING (',' elementsInConflict+=STRING)+ ';'
 ;
 
 AtomicChange:
 	CreateChange | DeleteChange | SingleReferenceChange | InsertReferenceChange | RemoveReferenceChange | SingleAttributeChange | InsertAttributeChange | RemoveAttributeChange | InsertRootChange | RemoveRootChange 
 ;
-
+//TODO NK root changes aren't needed for UML (not for my Master thesis). More informations are needed besides affectedEObjectID
+//URI is needed and maybe position?  
 InsertRootChange:
 	'INSERT' 'ROOT' affectedEObjectID=STRING ';' 
 ;
-
+//TODO NK root changes aren't needed for UML (not for my Master thesis). More informations are needed besides affectedEObjectID
+//URI is needed and maybe position? 
 RemoveRootChange:
 	'REMOVE' 'ROOT' affectedEObjectID=STRING ';' 
 ;
@@ -50,11 +65,14 @@ InsertReferenceChange:
 SingleReferenceChange:
 	'REPLACE' 'OLD' 'REFERENCE'  oldValueID=STRING 'WITH' 'NEW' 'REFERENCE' newValueID=STRING 'OF' 'FEATURE' feature=STRING  'OF' 'OBJECT' affectedEObjectID=STRING ';'  
 ;
-
+//TODO NK delete changes probably also need a type, so the change can be reversed, if the object is not in the uuidToEObject Map 
 DeleteChange:
 	'DELETE' affectedEObjectID=STRING ';'  
 ;
-
+//TODO instead of class=STRING use EClassifier, so new Objects can be created
+//at the moment an create change takes the "created Object" from the uuidToEObject Map.
+//At the moment it isn't possible to create an Object that isn't in the uuidToEObject Map,
+//so it is only possible to "re-create" Objects   
 CreateChange:
 	'CREATE' affectedEObjectID=STRING  'OF' 'TYPE' class=STRING  ';'  
 ;
@@ -62,16 +80,18 @@ CreateChange:
 
 
 RequiredFeatureRule:
-	(feature=ID) '=' isSet=BOOLEAN
+	(feature=STRING) '=' isSet=BOOLEAN
 ;
 
 SetsFeatureRule:
-	(feature=ID) ':=' isSet=BOOLEAN
+	(feature=STRING) ':=' isSet=BOOLEAN
 ;
 
 terminal BOOLEAN:
 	'true' | 'false'
 ;
+
+//TODO NK maybe instead of String use better terminal rules  
 
 //terminal UUID:
 //	'_'('a'..'z'|'A'..'Z'|'0'..'9')('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-')+
