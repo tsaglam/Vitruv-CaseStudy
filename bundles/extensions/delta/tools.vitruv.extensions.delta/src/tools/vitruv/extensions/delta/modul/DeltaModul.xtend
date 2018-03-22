@@ -44,6 +44,7 @@ import tools.vitruv.extensions.delta.dsl.deltaModul.AtomicChange
 import tools.vitruv.extensions.delta.dsl.deltaModul.DeltaModulFactory
 import tools.vitruv.extensions.delta.dsl.deltaModul.impl.DeltaModulFactoryImpl
 import tools.vitruv.extensions.delta.dsl.DeltaModulStandaloneSetup
+import org.eclipse.core.resources.ResourcesPlugin
 
 class DeltaModul {
 	
@@ -560,7 +561,7 @@ class DeltaModul {
 	deltaModul.name = this.name;
 	
 	//TODO NK resource uri chosen by user
-	deltaModul.uri = "C:/Users/nkopp/runtime-EclipseXtext/MyProject/src/My.uml"
+	deltaModul.uri = ResourcesPlugin.workspace.root.getProject("MyProject").location.toString + "/src/My.uml"
 	
 	
 //	//TODO NK features chosen by user
