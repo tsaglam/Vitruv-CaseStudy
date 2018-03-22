@@ -55,12 +55,14 @@ class DeltaModul {
 	private UuidResolver resolver
 	private String name
 	private String dirPath
+	private Map<EObjectSubstitution, List<EObjectSubstitution>> conflicts
 	
 	new(List<TransactionalChange> changeDescriptions, UuidResolver resolver, String filePath) {
 		important = new HashSet
 		this.resolver = resolver
 		substitutions = new HashMap
 		resubstitutions = new HashMap
+		conflicts = new HashMap
 		val pathWithoutFileExt = filePath.split("\\.").get(0)
 		this.name = null
 		for (var i= pathWithoutFileExt.length - 1; i >= 0 && this.name === null;i--) {
@@ -84,8 +86,16 @@ class DeltaModul {
 		val	r = rs.getResource(deltaModulUri,true);
 		deltaModul = r.contents.get(0) as tools.vitruv.extensions.delta.dsl.deltaModul.DeltaModul
 		this.name = deltaModul.name
-		
-		
+		conflicts = new HashMap
+		for (c : deltaModul.conflicts) {
+			val List<EObjectSubstitution> confList = new ArrayList
+			for(var i = 1; i < c.elementsInConflict.size; i++) {
+				confList.add(new EObjectSubstitution(c.elementsInConflict.get(i)))
+			}
+			if (confList.size > 0) {
+				conflicts.put(new EObjectSubstitution(c.elementsInConflict.get(0)),confList)	
+			}	
+		}
 		
 		important = new HashSet
 		substitutions = new HashMap
@@ -144,7 +154,7 @@ class DeltaModul {
             	 	) {
             	 		//add substitution
             	 		val change = c as ReplaceSingleValuedEReference<?,?>
-			            var EObjectSubstitution sub
+			           	var EObjectSubstitution sub
 			           	val featureName = change.getAffectedFeature().getName()
 			            if (substitutions.containsKey(change.getAffectedEObjectID())) {
 			               	 sub = new EObjectSubstitution(substitutions.get(change.getAffectedEObjectID()).toString(), featureName)
@@ -175,6 +185,7 @@ class DeltaModul {
 	 * a ghost change is for example: (All changes on the same object and the same feature)
 	 * Replace "A" to null, Replace null to "B", Replace "B" to null, Replace null to "C"
 	 * the changes in the middle are not needed and therefore removed
+	 * TODO NK combine Replace "A" to null and null to "B" to new Change "A" to "B"
 	 */
 	private def removeGhostChanges(List<EChange> changes) {
 		val removeChanges = new ArrayList<EChange>
@@ -491,12 +502,23 @@ class DeltaModul {
         return ""
 	}
 	
-	private def dispatch String canBeAddedToDeltaModul(tools.vitruv.framework.change.echange.feature.reference.ReplaceSingleValuedEReference<?, ?> change) {
+	private def dispatch String canBeAddedToDeltaModul(ReplaceSingleValuedEReference<?, ?> change) {
 		val oldValue = change.getOldValueID()
 		//check for substitution candidate
 		//candidate can't be null, 
 		//candidate can't be an object, that's created in the same modul
-        if (oldValue !== null && !important.contains(oldValue) && !substitutions.containsKey(oldValue)) {
+        if (oldValue !== null && !important.contains(oldValue)) {
+        	if (substitutions.containsKey(oldValue)) {
+        		val conflict = substitutions.get(oldValue);
+        		println("Warning: " + oldValue + " already substituted by "+ conflict.toString + "!")
+        		println("Deltamodul maybe needs manual optimization")
+        		var List<EObjectSubstitution> confList = conflicts.get(conflict)
+        		if (confList === null) {
+        			confList = new ArrayList
+        			conflicts.put(conflict, confList)
+        		}
+        		confList.add(new EObjectSubstitution(change.affectedEObjectID, change.affectedFeature.name))
+        	}
             return oldValue
         }
         return ""
@@ -559,7 +581,14 @@ class DeltaModul {
    	for (String imp : important) {
     	deltaModul.requiredObjects.add(imp)
     }
- 
+ 	for (con : conflicts.keySet) {
+ 		val deltaModulConflict = DeltaModulFactory.eINSTANCE.createConflict
+ 		deltaModulConflict.elementsInConflict.add(con.toString)
+ 		for (con2 : conflicts.get(con)) {
+ 			deltaModulConflict.elementsInConflict.add(con2.toString)
+ 		}
+ 		deltaModul.conflicts.add(deltaModulConflict)
+ 	}
     
 	val injector = new DeltaModulStandaloneSetup().createInjectorAndDoEMFRegistration();
 	val	rs = injector.getInstance(XtextResourceSet);
@@ -810,22 +839,25 @@ class DeltaModul {
 		val factory = VitruviusChangeFactory.instance
 		val result = factory.createCompositeTransactionalChange
 		val List<EChange> echanges = new ArrayList
-		for (c : this.deltaModul.changes) {
-			//put the substitutions in the substitution map
-			var isSub =false;
-			if (c instanceof SingleReferenceChange) {
-				isSub = isSubstitution(c.oldValueID)
-				if (isSub) {
-					val temp = findResubstitution(c.oldValueID)
-					if (temp !== null) {
-						val sub = new EObjectSubstitution(c.oldValueID)
-						substitutions.put(temp, sub)
-						resubstitutions.put(sub, temp)
-					}
-				}
-			}
-//			resolveSubstitutionForInverseChange(c)
-		}
+		findResubstitutions()
+//		for (c : this.deltaModul.changes) {
+//			//put the substitutions in the substitution map
+//			var isSub =false;
+//			if (c instanceof SingleReferenceChange) {
+//				isSub = isSubstitution(c.newValueID)
+//				if (isSub) {
+//					//val temp = findResubstitution(c.oldValueID)
+//					//if (temp !== null) {
+//						val sub = new EObjectSubstitution(c.newValueID)
+//						val EObject o = resolver.getEObject(c.affectedEObjectID);
+//						val temp = resolver.getUuid(o.eGet(o.eClass.getEStructuralFeature(c.feature)) as EObject)
+//						substitutions.put(temp, sub)
+//						resubstitutions.put(sub, temp)
+//					//}
+//				}
+//			}
+////			resolveSubstitutionForInverseChange(c)
+//		}
 		for (AtomicChange c: this.deltaModul.changes.reverseView) {	
 			val EChange echange = invertDeltaModulChange(c)
 			if (echange !== null) {
@@ -841,23 +873,15 @@ class DeltaModul {
 		return result
 	}
 	
-	private def String findResubstitution(String substitution) {
-		for (var int i = this.deltaModul.changes.size-1; i>=0; i--) {
-			val c = this.deltaModul.changes.get(i)
-			if (c instanceof SingleReferenceChange) {
-				if (c.newValueID.equals(substitution)) {
-					val EObject o = resolver.getEObject(c.affectedEObjectID);
-					return resolver.getUuid(o.eGet(o.eClass.getEStructuralFeature(c.feature)) as EObject)
-				} 
-//			} else if (c instanceof InsertReferenceChange) {
-//				if (c.newValueID.equals(substitution)) {
-//					val EObject o = resolver.getEObject(c.affectedEObjectID);
-//					return resolver.getUuid(o.eGet(o.eClass.getEStructuralFeature(c.feature)) as EObject)
-//				} 
-			}
-			
-		}
-		return null
+	private def void findResubstitutions() {
+		this.deltaModul.changes.filter(SingleReferenceChange).filter[isSubstitution(it.newValueID)].forEach(c |
+			{
+				val EObject o = resolver.getEObject(c.affectedEObjectID);
+				val sub = new EObjectSubstitution(c.newValueID)
+				val temp = resolver.getUuid(o.eGet(o.eClass.getEStructuralFeature(c.feature)) as EObject)
+				substitutions.put(temp, sub)
+				resubstitutions.put(sub, temp)
+			})
 	}
 	
 	private def boolean isSubstitution(String value) {
