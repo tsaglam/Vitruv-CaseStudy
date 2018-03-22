@@ -151,11 +151,10 @@ public class DeltaModulSynchronizingMonitoredEmfEditorImpl implements ISynchroni
                         LOGGER.trace("changeDescription is null. Change can not be synchronized: " + this);
                         return;
                     }
-                    final DeltaModul deltaModul = new DeltaModul(changeDescriptions,
-                            virtualModel.getUuidGeneratorAndResolver(), name);
-                    List<VitruviusChange> changes = new ArrayList<VitruviusChange>();
-                    changes.add(deltaModul.getChanges());
-                    triggerSynchronization(new ArrayList<VitruviusChange>(changes),
+                    new DeltaModul(changeDescriptions, virtualModel.getUuidGeneratorAndResolver(), name);
+                    // use recorded changeDescription because create+insert and remove+delete changes are applied
+                    // together
+                    triggerSynchronization(new ArrayList<VitruviusChange>(changeDescriptions),
                             editorPart.getEditedModelResource());
                 } else {
                     LOGGER.trace("Received change descriptions " + changeDescriptions);
