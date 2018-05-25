@@ -25,12 +25,19 @@ import tools.vitruv.domains.emf.monitorededitor.tools.EclipseAdapterProvider;
 import tools.vitruv.domains.emf.monitorededitor.tools.EditorManagementListenerMgr;
 import tools.vitruv.domains.emf.monitorededitor.tools.IEclipseAdapter;
 import tools.vitruv.domains.emf.monitorededitor.tools.IEditorManagementListener;
-import tools.vitruv.extensions.delta.modul.DeltaModul;
+import tools.vitruv.extensions.delta.modul.DeltaModulGenerator;
 import tools.vitruv.framework.change.description.TransactionalChange;
 import tools.vitruv.framework.change.description.VitruviusChange;
 import tools.vitruv.framework.util.datatypes.VURI;
 import tools.vitruv.framework.vsum.VirtualModel;
 
+/**
+ * TODO NK Code copy of SynchronizingMonitoredEMFEditorImpl only setupMonitorForEditor(final
+ * IEditorPartAdapter editorPart) method is different
+ * 
+ * @author Nico Kopp
+ *
+ */
 public class DeltaModulSynchronizingMonitoredEmfEditorImpl implements ISynchronizingMonitoredEmfEditor {
 
     public DeltaModulSynchronizingMonitoredEmfEditorImpl(final VirtualModel virtualModel,
@@ -151,7 +158,7 @@ public class DeltaModulSynchronizingMonitoredEmfEditorImpl implements ISynchroni
                         LOGGER.trace("changeDescription is null. Change can not be synchronized: " + this);
                         return;
                     }
-                    new DeltaModul(changeDescriptions, virtualModel.getUuidGeneratorAndResolver(), name);
+                    new DeltaModulGenerator(changeDescriptions, virtualModel.getUuidGeneratorAndResolver(), name);
                     // use recorded changeDescription because create+insert and remove+delete changes are applied
                     // together
                     triggerSynchronization(new ArrayList<VitruviusChange>(changeDescriptions),

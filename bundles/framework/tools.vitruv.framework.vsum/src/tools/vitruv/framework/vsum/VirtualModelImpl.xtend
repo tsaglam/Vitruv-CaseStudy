@@ -20,7 +20,7 @@ import tools.vitruv.framework.vsum.repositories.ResourceRepositoryImpl
 import tools.vitruv.framework.vsum.repositories.ModelRepositoryImpl
 import tools.vitruv.framework.change.echange.EChangeIdManager
 import org.eclipse.emf.common.util.URI
-import tools.vitruv.extensions.delta.modul.DeltaModul
+import tools.vitruv.extensions.delta.modul.DeltaModulGenerator
 
 class VirtualModelImpl implements InternalVirtualModel {
 	private val ResourceRepositoryImpl resourceRepository;
@@ -110,7 +110,7 @@ class VirtualModelImpl implements InternalVirtualModel {
 	}
 	
 	override applyDelta(URI fileURI, boolean forwards) { 
-		val deltaModul = new DeltaModul(fileURI, uuidGeneratorAndResolver)
+		val deltaModul = new DeltaModulGenerator(fileURI, uuidGeneratorAndResolver)
 		var VitruviusChange change
 		if (forwards) {
 			change = deltaModul.changes

@@ -15,70 +15,106 @@ import tools.vitruv.framework.change.echange.feature.UnsetFeature
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EReference
 
-class EChangeComparator implements Comparator<EChange> {
+
+class EChangeTypeComparator implements Comparator<EChange> {
 
 	/**
-     * Highest Priority. May be used by other EChanges.
+     * Default: Highest Priority. May be used by other EChanges.
      */
-    private static final int CREATE_EOBJECT_VALUE = 0;
+    private final int CREATE_EOBJECT_VALUE;
 
     /**
-     * Higher Priority then Attribute. Single Reference Changes has Higher Priority than Multi-Reference
+     * Default: Higher Priority then Attribute. Single Reference Changes has Higher Priority than Multi-Reference
      * Changes
      */
-    private static final int REPLACE_SINGLE_VALUED_EREFERENCE_VALUE = 10;
+    private final int REPLACE_SINGLE_VALUED_EREFERENCE_VALUE;
 
 	 /**
-     * Higher Priority then Attribute. Single Reference Changes has Higher Priority than Multi-Reference
+     * Default: Higher Priority then Attribute. Single Reference Changes has Higher Priority than Multi-Reference
      * Changes
      */
-	private static final int UNSET_EREFERENCE_VALUE = 10;
+	private final int UNSET_EREFERENCE_VALUE;
 	
     /**
-     * Same Priority as Single Reference Changes. An Root Changes is the "same" as an Set or an Unset
+     * Default: Same Priority as Single Reference Changes. An Root Changes is the "same" as an Set or an Unset
      * Change
      */
-    private static final int ROOT_ECHANGE_VALUE = 10;
+    private final int ROOT_ECHANGE_VALUE;
 
     /**
-     * Higher Priority then Attribute. Single Reference Changes has Higher Priority than Multi-Reference
+     * Default: Higher Priority then Attribute. Single Reference Changes has Higher Priority than Multi-Reference
      * Changes
      */
-    private static final int INSERT_EREFERENCE_VALUE = 100;
+    private final int INSERT_EREFERENCE_VALUE;
 
     /**
-     * Higher Priority then Attribute. Single Reference Changes has Higher Priority than Multi-Reference
+     * Default: Higher Priority then Attribute. Single Reference Changes has Higher Priority than Multi-Reference
      * Changes
      */
-    private static final int REMOVE_EREFERENCE_VALUE = 100;
+    private final int REMOVE_EREFERENCE_VALUE;
 
     /**
-     * Lower Priority then Reference. Order of Attribute Changes should be the same as the recorded one
+     * Default: Lower Priority then Reference. Order of Attribute Changes should be the same as the recorded one
      */
-    private static final int REPLACE_SINGLE_VALUED_EATTRIBUTE_VALUE = 1000;
+    private final int REPLACE_SINGLE_VALUED_EATTRIBUTE_VALUE;
 
     /**
-     * Lower Priority then Reference. Order of Attribute Changes should be the same as the recorded one
+     * Default: Lower Priority then Reference. Order of Attribute Changes should be the same as the recorded one
      */
-    private static final int INSERT_EATTRIBUTE_VALUE = 1000;
+    private final int INSERT_EATTRIBUTE_VALUE;
 
     /**
-     * Lower Priority then Reference. Order of Attribute Changes should be the same as the recorded one
+     * Default: Lower Priority then Reference. Order of Attribute Changes should be the same as the recorded one
      */
-    private static final int REMOVE_EATTRIBUTE_VALUE = 1000;
+    private final int REMOVE_EATTRIBUTE_VALUE;
 
     /**
-     * Lower Priority then Reference. Order of Attribute Changes should be the same as the recorded one
+     * Default: Lower Priority then Reference. Order of Attribute Changes should be the same as the recorded one
      */
-	private static final int UNSET_EATTRIBUTE_VALUE = 1000;
+	private final int UNSET_EATTRIBUTE_VALUE;
     
     /**
-     * Lowest Priority. Element maybe still needed.
+     * Default: Lowest Priority. Element maybe still needed.
      */
-    private static final int DELETE_EOBJECT_VALUE = 10000;
+    private final int DELETE_EOBJECT_VALUE;
 	
-
-	
+	/**
+	 * Default compare strategy: 
+	 * createChanges < SingleValuedReferenceChanges = rootChanges < ManyValuedReferenceChanges < AttributeChanges < DeleteChanges 
+	 */
+	new () {
+		CREATE_EOBJECT_VALUE = 0;
+		REPLACE_SINGLE_VALUED_EREFERENCE_VALUE = 10;
+		UNSET_EREFERENCE_VALUE = 10;
+		ROOT_ECHANGE_VALUE = 10;
+		INSERT_EREFERENCE_VALUE = 100;
+		REMOVE_EREFERENCE_VALUE = 100;
+		REPLACE_SINGLE_VALUED_EATTRIBUTE_VALUE = 1000;
+		INSERT_EATTRIBUTE_VALUE = 1000;
+		REMOVE_EATTRIBUTE_VALUE = 1000;
+		UNSET_EATTRIBUTE_VALUE = 1000;
+		DELETE_EOBJECT_VALUE = 10000;
+	}
+	/**
+	 * Constructur for defining individual compare strategies
+	 * TODO NK find better way to initialize the compare constants, maybe with Map<EClass, Integer>
+	 */
+	new (int[] compareValues) {
+		if (compareValues === null || compareValues.size < 11) {
+			throw new IllegalArgumentException("not enough compareValues")
+		}
+		CREATE_EOBJECT_VALUE = compareValues.get(0);
+		REPLACE_SINGLE_VALUED_EREFERENCE_VALUE = compareValues.get(1);
+		UNSET_EREFERENCE_VALUE = compareValues.get(2);
+		ROOT_ECHANGE_VALUE = compareValues.get(3);
+		INSERT_EREFERENCE_VALUE = compareValues.get(4);
+		REMOVE_EREFERENCE_VALUE = compareValues.get(5);
+		REPLACE_SINGLE_VALUED_EATTRIBUTE_VALUE = compareValues.get(6);
+		INSERT_EATTRIBUTE_VALUE = compareValues.get(7);
+		REMOVE_EATTRIBUTE_VALUE = compareValues.get(8);
+		UNSET_EATTRIBUTE_VALUE = compareValues.get(9);
+		DELETE_EOBJECT_VALUE = compareValues.get(10);
+	}
 
     override compare(EChange arg0, EChange arg1) {
         if (arg0 === null || arg1 === null) {
