@@ -148,7 +148,7 @@ abstract class AbstractCompositeChangeImpl<C extends VitruviusChange> implements
 		}
 		//representation = representation.replaceFirst("affectedEObjectID: (.)+\\)", '''«eChanges»)''')
 		
-		// TODO TS (TOSTRING) use custom path here to make things more reable (see line above)
+		// TODO TS (TOSTRING) use custom path here to make things more reable (see line below)
 		//representation = representation.replace("/Users/Timur/Dropbox/Studium/Eclipse%20Workspace/vitruv%20workspace/Vitruv-Applications-ComponentBasedSystems/tests/pcmumlclassjava/tools.vitruv.applications.transitivechange.tests/out", "")
 		representation = representation.replace("/Vitruv-Applications-ComponentBasedSystems/tests/pcmumlclassjava/tools.vitruv.applications.transitivechange.tests/out", "")
 		
