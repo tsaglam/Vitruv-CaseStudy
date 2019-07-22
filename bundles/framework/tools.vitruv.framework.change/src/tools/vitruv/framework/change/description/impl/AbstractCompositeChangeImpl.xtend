@@ -7,6 +7,11 @@ import tools.vitruv.framework.change.description.CompositeChange
 import tools.vitruv.framework.change.description.VitruviusChange
 import tools.vitruv.framework.change.echange.EChange
 import tools.vitruv.framework.uuid.UuidResolver
+import tools.vitruv.framework.change.echange.feature.FeatureEChange
+import tools.vitruv.framework.change.echange.AdditiveEChange
+import tools.vitruv.framework.change.echange.SubtractiveEChange
+import tools.vitruv.framework.change.echange.root.RootEChange
+import tools.vitruv.framework.change.echange.eobject.EObjectExistenceEChange
 
 abstract class AbstractCompositeChangeImpl<C extends VitruviusChange> implements CompositeChange<C> {
 	List<C> changes;
@@ -102,12 +107,75 @@ abstract class AbstractCompositeChangeImpl<C extends VitruviusChange> implements
 		return changes.map[userInteractions].flatten
 	}
 
-	override toString() '''
+	// TODO TS (TOSTRING) original method:
+	def String toStringOriginal() '''
 		«this.class.simpleName», VURI: «URI»
 			«FOR change : changes»
 				«change»
 			«ENDFOR»
 	'''
+
+	override toString() {
+		return toStringNew() // TODO TS (TOSTRING) use custom toStringNew instead of toStringOriginal
+	}
+	
+	// TODO TS (TOSTRING) kills anything related to Correspondence
+	def String toStringNew() {
+		val string = toStringNew2
+		if (string.contains("Correspondence")) {
+			return ""
+		}
+		return string
+	}
+
+	// TODO TS (TOSTRING) no URI, but changes size and readable subchanges
+	def String toStringNew2() '''
+		«this.class.simpleName» with «changes.size» changes:
+			«FOR change : changes»
+				«change.readable»
+			«ENDFOR»
+	'''
+
+	// TODO TS (TOSTRING) filters paths, file names, etc.
+	private def String readable(C change) {
+		var representation = change.toString
+		val list = change.EChanges.map[e|e.obj]
+		var String eChanges
+		if (list.size == 1) {
+			eChanges = list.get(0).toString
+		} else {
+			eChanges = "many: " + list.toString
+		}
+		//representation = representation.replaceFirst("affectedEObjectID: (.)+\\)", '''«eChanges»)''')
+		
+		// TODO TS (TOSTRING) use custom path here to make things more reable (see line above)
+		//representation = representation.replace("/Users/Timur/Dropbox/Studium/Eclipse%20Workspace/vitruv%20workspace/Vitruv-Applications-ComponentBasedSystems/tests/pcmumlclassjava/tools.vitruv.applications.transitivechange.tests/out", "")
+		representation = representation.replace("/Vitruv-Applications-ComponentBasedSystems/tests/pcmumlclassjava/tools.vitruv.applications.transitivechange.tests/out", "")
+		
+		representation = representation.replaceAll("file:(.)+src", "file:src")
+		return representation.replace("tools.vitruv.dsls.reactions.meta.correspondence.reactions.impl.","")
+	}
+
+	private def dispatch String getObj(FeatureEChange<?, ?> change) {
+		return "affectedEObject: " + change.affectedEObject.toString
+
+	}
+
+	private def dispatch String getObj(AdditiveEChange<?> change) {
+		return "new value: " + change.newValue
+	}
+
+	private def dispatch String getObj(SubtractiveEChange<?> change) {
+		return "old value: " + change.oldValue
+	}
+
+	private def dispatch String getObj(RootEChange change) {
+		return "root change: " + change
+	}
+
+	private def dispatch String getObj(EObjectExistenceEChange<?> change) {
+		return "affectedEObject: " + change.affectedEObject
+	}
 
 	/**
 	 * Indicates whether some other object is "equal to" this composite change.

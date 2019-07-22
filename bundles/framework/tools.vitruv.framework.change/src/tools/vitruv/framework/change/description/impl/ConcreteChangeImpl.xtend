@@ -7,8 +7,14 @@ class ConcreteChangeImpl extends AbstractConcreteChange {
 		super(eChange);
     }
 
-    override String toString() {
-        return this.class.getSimpleName() + ", VURI: " + this.URI + "\n	EChange: " + this.EChange;
-    }
+// TODO TS (TOSTRING) original method:
+//    override String toString() {
+//        return this.class.getSimpleName() + ", VURI: " + this.URI + "\n	EChange: " + this.EChange;
+//    }
+
+	// TODO TS (TOSTRING) prints ONLY EChanges and no simple name or VURI:
+	override String toString() {
+		return this.EChange.toString;
+	}
 
 }
