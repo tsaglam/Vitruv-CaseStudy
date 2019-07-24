@@ -15,6 +15,7 @@ import tools.vitruv.framework.change.echange.feature.FeatureEChange;
 import tools.vitruv.framework.change.echange.feature.FeaturePackage;
 
 import tools.vitruv.framework.change.echange.impl.EChangeImpl;
+import tools.vitruv.framework.change.echange.util.StringRepresentationUtil;
 
 /**
  * <!-- begin-user-doc -->
@@ -279,32 +280,15 @@ public abstract class FeatureEChangeImpl<A extends EObject, F extends EStructura
 	@Override
 	public String toString() {
 		if (eIsProxy()) return super.toString();
-
 		StringBuffer result = new StringBuffer(super.toString());
 		result.append(" (affectedEObject: ");
-        result.append(readable(affectedEObject)); // TODO TS (TOSTRING) adds actual affected EObject
+        result.append(StringRepresentationUtil.readable(affectedEObject)); // TODO TS (TOSTRING) adds actual affected EObject
         result.append(" on feature ");
-        result.append(readable(affectedFeature));
-		result.append(", affectedEObjectID: ");
-		result.append(affectedEObjectID);
+        result.append(StringRepresentationUtil.nameOf(affectedFeature));
+		//result.append(", affectedEObjectID: "); // TODO TS (TOSTRING) kill id
+		//result.append(affectedEObjectID);
 		result.append(')');
 		return result.toString();
-	}
-	
-	/**
-	 * Replaces fully qualified name by simple name.
-	 * Cuts off everything after the name of the object.
-	 * As an example, it cuts off "(ordered: true, unique: true, lowerBound: 1, upperBound: 1) [...]"
-	 */
-	private String readable(Object object) { // TODO TS (TOSTRING) makes affected eobject more readable
-	    if (object == null) {
-            return "null";
-        }
-	    String readableRepresentation = object.toString().replace(object.getClass().getName(), object.getClass().getSimpleName());
-	    if (readableRepresentation.contains(")")) {
-            return readableRepresentation.substring(0, readableRepresentation.indexOf(')') + 1);
-        }
-        return readableRepresentation;
 	}
 
 } //FeatureEChangeImpl
