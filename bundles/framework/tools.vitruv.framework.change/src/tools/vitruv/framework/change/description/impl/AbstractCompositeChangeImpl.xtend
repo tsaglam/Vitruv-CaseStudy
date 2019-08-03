@@ -12,6 +12,7 @@ import tools.vitruv.framework.change.echange.AdditiveEChange
 import tools.vitruv.framework.change.echange.SubtractiveEChange
 import tools.vitruv.framework.change.echange.root.RootEChange
 import tools.vitruv.framework.change.echange.eobject.EObjectExistenceEChange
+import tools.vitruv.framework.change.echange.util.StringRepresentationUtil
 
 abstract class AbstractCompositeChangeImpl<C extends VitruviusChange> implements CompositeChange<C> {
 	List<C> changes;
@@ -132,26 +133,25 @@ abstract class AbstractCompositeChangeImpl<C extends VitruviusChange> implements
 	def String toStringNew2() '''
 		«this.class.simpleName» with «changes.size» changes:
 			«FOR change : changes»
-				«change.readable»
+				«readable(change)»
 			«ENDFOR»
 	'''
 
 	// TODO TS (TOSTRING) filters paths, file names, etc.
 	private def String readable(C change) {
 		var representation = change.toString
-		val list = change.EChanges.map[e|e.obj]
-		var String eChanges
-		if (list.size == 1) {
-			eChanges = list.get(0).toString
-		} else {
-			eChanges = "many: " + list.toString
-		}
+//		val list = change.EChanges.map[e|e.obj]
+//		var String eChanges
+//		if (list.size == 1) {
+//			eChanges = list.get(0).toString
+//		} else {
+//			eChanges = "many: " + list.toString
+//		}
 		//representation = representation.replaceFirst("affectedEObjectID: (.)+\\)", '''«eChanges»)''')
 		
 		// TODO TS (TOSTRING) use custom path here to make things more reable (see line below)
-		//representation = representation.replace("/Users/Timur/Dropbox/Studium/Eclipse%20Workspace/vitruv%20workspace/Vitruv-Applications-ComponentBasedSystems/tests/pcmumlclassjava/tools.vitruv.applications.transitivechange.tests/out", "")
-		representation = representation.replace("/Vitruv-Applications-ComponentBasedSystems/tests/pcmumlclassjava/tools.vitruv.applications.transitivechange.tests/out", "")
-		
+		val pathToOutput = "/Users/Timur/Dropbox/Studium/Eclipse%20Workspace/vitruv%20workspace/Vitruv-Applications-ComponentBasedSystems/tests/pcmumlclassjava/tools.vitruv.applications.transitivechange.tests/out"
+		representation = representation.replace(pathToOutput, "")
 		representation = representation.replaceAll("file:(.)+src", "file:src")
 		return representation.replace("tools.vitruv.dsls.reactions.meta.correspondence.reactions.impl.","")
 	}
