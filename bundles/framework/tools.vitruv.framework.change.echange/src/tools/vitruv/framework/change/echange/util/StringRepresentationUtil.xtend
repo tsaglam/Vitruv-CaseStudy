@@ -16,12 +16,12 @@ class StringRepresentationUtil {
 	 * Replaces fully qualified name by simple name.
 	 * Cuts off everything after first closed bracket (e.g. after "(name: aName)").
 	 */
-	def static readable(EObject object) {
+	def static readable(Object object) {
 		if (object === null) {
 			return NULL;
 		}
 		var text = object.modelPrefix + object.toString.replace(object.class.name, object.class.simpleName)
-		return text.cutAfterFirstClosingBracket
+		return text.cutAfterFirstClosingBracket.shortenPaths
 	}
 
 	/**
@@ -33,7 +33,12 @@ class StringRepresentationUtil {
 		}
 		return object.readable
 	}
-
+	
+	def private static shortenPaths(String text) {
+		val shortened = text.replaceAll("file:(.)+\\/src\\/", "file:src/")
+		return shortened.replaceAll("file:(.)+\\/model\\/", "file:model/")
+	}
+	
 	def private static cutAfterFirstClosingBracket(String text) {
 		if (text.contains(BRACKET)) {
 			return text.substring(0, text.indexOf(BRACKET) + 1)
@@ -41,7 +46,7 @@ class StringRepresentationUtil {
 		return text
 	}
 
-	def private static getModelPrefix(EObject object) {
+	def private static getModelPrefix(Object object) {
 		for (model : MODELS) {
 			if (object.class.name.contains(DOT + model + DOT)) {
 				return model + DOT
