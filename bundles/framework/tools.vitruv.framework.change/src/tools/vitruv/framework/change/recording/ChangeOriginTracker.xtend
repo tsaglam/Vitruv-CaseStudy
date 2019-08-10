@@ -12,7 +12,6 @@ import org.eclipse.xtend.lib.annotations.Accessors
  */
 class ChangeOriginTracker {
 	static val String REACTION = "Reaction"
-	static val String EXECUTE = "executeRoutine"
 	static val String CORRESPONDENCE = "Correspondence"
 
 	@Accessors
@@ -25,7 +24,7 @@ class ChangeOriginTracker {
 	 */
 	def static report(Iterable<EChange> changes) {
 		if (trackingEnabled) {
-			val filteredStackTrace = new Exception().stackTrace.filter[it.toString.contains(REACTION) && it.toString.contains(EXECUTE)]
+			val filteredStackTrace = new Exception().stackTrace.filter[it.toString.contains(REACTION)]
 			trackedChangeSequences += new ChangeSequence(changes.toList, filteredStackTrace.toList)
 		}
 	}
