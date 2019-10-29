@@ -11,8 +11,10 @@ import org.eclipse.xtend.lib.annotations.Accessors
  * Static class with state that tracks changes and whch reaction is responsible for these changes.
  */
 class ChangeOriginTracker {
-	static val String REACTION = "Reaction"
 	static val String CORRESPONDENCE = "Correspondence"
+	static val String MIR = "mir.r" // mir reaction or routine
+	static val String DOLLAR = "$" // generated generic methods
+	static val String FACADE = ".RoutinesFacade." // unwanted facade lines
 
 	@Accessors
 	static val List<ChangeSequence> trackedChangeSequences = new ArrayList
@@ -24,7 +26,7 @@ class ChangeOriginTracker {
 	 */
 	def static report(Iterable<EChange> changes) {
 		if (trackingEnabled) {
-			val filteredStackTrace = new Exception().stackTrace.filter[it.toString.contains(REACTION)]
+			val filteredStackTrace = new Exception().stackTrace.filter[it.toString.contains(MIR) && !it.toString.contains(DOLLAR) && !it.toString.contains(FACADE)]
 			trackedChangeSequences += new ChangeSequence(changes.toList, filteredStackTrace.toList)
 		}
 	}
@@ -41,6 +43,12 @@ class ChangeOriginTracker {
 	 */
 	def static printAll() {
 		trackedChangeSequences.forEach[System.err.println(it)]
+	}
+
+	def static printLatest() {
+		if (!trackedChangeSequences.empty) {
+			System.err.println(trackedChangeSequences.get(trackedChangeSequences.size - 1))
+		}
 	}
 
 	/** 
