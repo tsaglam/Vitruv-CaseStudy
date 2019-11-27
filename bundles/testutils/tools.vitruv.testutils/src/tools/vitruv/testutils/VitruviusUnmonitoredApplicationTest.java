@@ -192,7 +192,7 @@ public abstract class VitruviusUnmonitoredApplicationTest extends VitruviusTest 
 	 */
 	protected void assertModelExists(String modelPathWithinProject) {
 		boolean modelExists = URIUtil.existsResourceAtUri(getModelVuri(modelPathWithinProject).getEMFUri());
-		assertTrue("Model at " + modelPathWithinProject + " does not exist bust should", modelExists);
+		assertTrue("Model at " + modelPathWithinProject + " does not exist but should", modelExists);
 	}
 
 	/**
