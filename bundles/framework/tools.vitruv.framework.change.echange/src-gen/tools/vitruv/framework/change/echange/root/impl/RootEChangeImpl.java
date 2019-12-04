@@ -261,7 +261,7 @@ public abstract class RootEChangeImpl extends EChangeImpl implements RootEChange
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (uri: ");
 		result.append(StringRepresentationUtil.readable(uri));
 		result.append(", resource: ");

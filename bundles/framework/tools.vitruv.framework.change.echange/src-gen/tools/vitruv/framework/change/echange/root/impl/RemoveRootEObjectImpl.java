@@ -266,7 +266,7 @@ public class RemoveRootEObjectImpl<T extends EObject> extends RootEChangeImpl im
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (oldValue: ");
 		result.append(StringRepresentationUtil.readable(oldValue)); // TODO TS (TOSTRING) actual old value
 		result.append(')');

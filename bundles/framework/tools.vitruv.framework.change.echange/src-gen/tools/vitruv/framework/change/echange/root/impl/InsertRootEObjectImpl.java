@@ -266,7 +266,7 @@ public class InsertRootEObjectImpl<T extends EObject> extends RootEChangeImpl im
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (newValue: ");
 		result.append(StringRepresentationUtil.readable(newValue)); // TODO TS (TOSTRING) actual new value
 		result.append(')');

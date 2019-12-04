@@ -280,7 +280,7 @@ public abstract class FeatureEChangeImpl<A extends EObject, F extends EStructura
 	@Override
 	public String toString() {
 		if (eIsProxy()) return super.toString();
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (affectedEObject: ");
         result.append(StringRepresentationUtil.readable(affectedEObject)); // TODO TS (TOSTRING) adds actual affected EObject
         result.append(" on feature ");

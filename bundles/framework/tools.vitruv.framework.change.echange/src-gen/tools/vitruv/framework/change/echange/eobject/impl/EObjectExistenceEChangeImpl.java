@@ -331,7 +331,7 @@ public abstract class EObjectExistenceEChangeImpl<A extends EObject> extends ECh
 	public String toString() {
 		if (eIsProxy()) return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (idAttributeValue: ");
 		result.append(idAttributeValue);
 		//result.append(", affectedEObjectID: "); // TODO TS (TOSTRING) kill id
