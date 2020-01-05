@@ -47,7 +47,7 @@ class ChangeOriginTracker {
 
 	def static printLatest() {
 		if (!trackedChangeSequences.empty) {
-			System.err.println(trackedChangeSequences.get(trackedChangeSequences.size - 1))
+			System.err.println(trackedChangeSequences.last)
 		}
 	}
 
@@ -56,6 +56,13 @@ class ChangeOriginTracker {
 	 */
 	def static printNonCorrespondence() {
 		trackedChangeSequences.filter[!it.changes.toString.contains(CORRESPONDENCE)].forEach[System.err.println(it)]
+	}
+	
+	/** 
+	 * Prints only the change sequences that mention correspondence model changes.
+	 */
+	def static printOnlyCorrespondence() {
+		trackedChangeSequences.filter[it.changes.toString.contains(CORRESPONDENCE)].forEach[System.err.println(it)]
 	}
 
 	@Data
