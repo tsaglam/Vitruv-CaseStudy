@@ -16,7 +16,7 @@ class ChangeOriginTracker {
     static val String FACADE = ".RoutinesFacade." // unwanted facade lines
     @Accessors static val List<ChangeSequence> trackedChangeSequences = new ArrayList
     @Accessors static boolean trackingEnabled = false
-    @Accessors static boolean printNewChanges = false
+    @Accessors static boolean autoPrintNewChanges = false
 
     /**
      * Reports a change sequence, if tracking is enabled. The change sequence is matched with the correlating reactions stack.
@@ -26,8 +26,9 @@ class ChangeOriginTracker {
             val reactionsStackTrace = new Exception().stackTrace.filter [
                 toString.contains(MIR) && !toString.contains(DOLLAR) && !toString.contains(FACADE)
             ]
-            trackedChangeSequences += new ChangeSequence(changes.toList, reactionsStackTrace.toList)
-            if (printNewChanges && !trackedChangeSequences.last.isCorrespondence)
+            val topic = TransformationType.values.findFirst[reactionsStackTrace.toString.contains(it.getIndicator)]
+            trackedChangeSequences += new ChangeSequence(topic, changes.toList, reactionsStackTrace.toList)
+            if (autoPrintNewChanges && !trackedChangeSequences.last.isCorrespondence)
                 printLatest
         }
     }
@@ -68,6 +69,7 @@ class ChangeOriginTracker {
 
     @Data
     static class ChangeSequence {
+        TransformationType topic
         List<EChange> changes
         List<StackTraceElement> reactionStackTrace
 
@@ -77,5 +79,21 @@ class ChangeOriginTracker {
         def isCorrespondence() {
             changes.toString.contains(CORRESPONDENCE)
         }
+
+        // Creates a slightly adapted string representation compared to the @Data one
+        override toString() '''
+            «class.simpleName» by «topic» [
+                CHANGES:
+                    «FOR change : changes»
+                        «change»
+                    «ENDFOR»
+                «IF !reactionStackTrace.empty»
+                    REACTION STACK TRACE:
+                        «FOR element : reactionStackTrace»
+                            «element»
+                        «ENDFOR»
+                «ENDIF»
+            ]
+        '''
     }
 }
