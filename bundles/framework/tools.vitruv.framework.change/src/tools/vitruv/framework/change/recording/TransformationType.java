@@ -5,7 +5,7 @@ public enum TransformationType {
     JAVA_2_UML("javaToUml", "JAVA --> UML"),
     UML_2_JAVA("umlToJava", "UML --> JAVA"),
     PCM_2_JAVA("pcm2java", "PCM --> JAVA"),
-    JAVA_2_PCM("java2pcm", "JAVA --> PCM"),
+    JAVA_2_PCM("java2Pcm", "JAVA --> PCM"),
     UML_2_PCM("reactions.uml", "UML --> PCM"),
     PCM_2_UML("reactions.pcm", "PCM --> UML"),
     MANUAL_INPUT("", "MANUAL USER INPUT");
